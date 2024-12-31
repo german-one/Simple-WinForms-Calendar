@@ -1,10 +1,7 @@
-@setlocal DisableDelayedExpansion&set "dark=0"&for /f "tokens=3" %%i in ('2^>nul reg.exe query "HKCU\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize" -v "AppsUseLightTheme"') do @set /a "dark=!%%i"
-@if %dark%==1 (set "fBC='#3F4144'"&set "cBC='#1F2023'"&set "cFC='White'"&set "tBC='#CFD1D4'"&set "tFC='Black'") else set "fBC='#DFE0E3'"&set "cBC='#EFF0F2'"&set "cFC='Black'"&set "tBC='#3F4144'"&set "tFC='White'"
-@for %%i in ("pwsh.exe") do @if "%%~$PATH:i"=="" (set "ps=powershell") else set "ps=pwsh"
-@start /min conhost.exe %ps%.exe -w Hidden -c ^"^
- Add-Type -AN System.Windows.Forms;$w=Add-Type -Name W '[DllImport(\"dwmapi\")]public static extern void DwmSetWindowAttribute(IntPtr w,int a,ref int v,int s);' -PassThru;^
- $f=New-Object Windows.Forms.Form -Property @{AutoSize=$true;BackColor=%fBC%;StartPosition='CenterScreen';Text='Calendar'};^
- $ck=New-Object Windows.Forms.CheckBox -Property @{AutoSize=$true;ForeColor=%cFC%;Padding='20,10,0,0';Text='Always on top'};^
- $c=New-Object Windows.Forms.MonthCalendar -Property @{BackColor=%cBC%;CalendarDimensions='3,4';ForeColor=%cFC%;ScrollChange=3;ShowToday=$false;ShowWeekNumbers=$true;TitleBackColor=%tBC%;TitleForeColor=%tFC%};^
- $f.add_Shown({$useDark=%dark%;$w::DwmSetWindowAttribute($this.Handle,20,[ref]$useDark,4);$c.Left=($this.ClientSize.Width-$c.Width)/2;$c.Top=($this.ClientSize.Height-$c.Height)/2+$ck.Height});^
- $ck.add_CheckedChanged({$this.Parent.TopMost=$this.Checked});$f.Controls.AddRange(@($ck,$c));$f.ShowDialog();^"
+@set p=&for %%i in (pwsh.exe powershell.exe) do @if not defined p set p=%%~$PATH:i
+@start /min conhost "%p%" -w Hidden -c ^"Add-Type -AN System.Windows.Forms;Add-Type i '[DllImport(\"dwmapi\")]public static extern void DwmSetWindowAttribute(IntPtr w,int a,int[] v,int s);'-NS p;^
+$d=-not(gp HKCU:\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize).AppsUseLightTheme;if($d){$a='#3F4144','#1F2023','White','#CFD1D4','Black'}else{$a='#DFE0E3','#EFF0F2','Black','#3F4144','White'}^
+$f=[Windows.Forms.Form]@{AutoSize=1;BackColor=$a[0];FormBorderStyle=2;Icon=[Drawing.Icon]::ExtractAssociatedIcon('%p%');MaximizeBox=0;Text='Calendar'};^
+$f.add_Shown({[p.i]::DwmSetWindowAttribute($f.Handle,20,@($d),4);$s=$f.ClientSize;$c.Left=($s.Width-$c.Width)/2;$c.Top=($s.Height-$c.Height)/2+$b.Height});^
+$c=[Windows.Forms.MonthCalendar]@{BackColor=$a[1];CalendarDimensions='3,4';ForeColor=$a[2];ScrollChange=3;ShowToday=0;ShowWeekNumbers=1;TitleBackColor=$a[3];TitleForeColor=$a[4]};^
+$b=[Windows.Forms.CheckBox]@{AutoSize=1;ForeColor=$a[2];Padding='20,10,0,0';Text='Always on top'};$b.add_CheckedChanged({$f.TopMost=$b.Checked});$f.Controls.AddRange(@($b,$c));$f.ShowDialog();^"
