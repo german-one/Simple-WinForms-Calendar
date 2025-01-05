@@ -1,5 +1,9 @@
-new ActiveXObject('WScript.Shell').Run("conhost.exe powershell.exe -c \""+
+var i=0, f=new ActiveXObject('Scripting.FileSystemObject'), s=new ActiveXObject('WScript.Shell'), p=s.Environment('PROCESS')('PATH').split(';'), ps='powershell.exe';
+for(; i<p.length; ++i) if(p[i]!='' && f.FileExists(p[i]+'\\pwsh.exe')){ps='pwsh.exe'; break;}
+s.Run("conhost.exe "+ps+" -c \""+
 "Add-Type -AN System.Windows.Forms;"+
+"if($host.Version.Major -lt 7){$ref='System.Windows.Forms'}"+
+"else{$ref='Microsoft.Win32.Registry','System.Windows.Forms','System.ComponentModel.Primitives','System.Windows.Forms.Primitives','System.Threading.Thread'}"+
 "Add-Type '"+
 "using Microsoft.Win32;"+
 "using System;"+
@@ -9,6 +13,9 @@ new ActiveXObject('WScript.Shell').Run("conhost.exe powershell.exe -c \""+
 "public class DLForm:Form{"+
 "  [DllImport(\\\"dwmapi.dll\\\")] static extern int DwmSetWindowAttribute(IntPtr w,int a,ref int v,int s);"+
 "  [DllImport(\\\"user32.dll\\\")] static extern int SetThreadDpiAwarenessContext(int c);"+
+"  public static void SetThreadDpiAware(){"+
+"    SetThreadDpiAwarenessContext(-4);"+
+"  }"+
 "  public void SuspendRedrawWhile(Action act){"+
 "    Message m=Message.Create(Handle,11,IntPtr.Zero,IntPtr.Zero);"+
 "    DefWndProc(ref m);"+
@@ -35,10 +42,9 @@ new ActiveXObject('WScript.Shell').Run("conhost.exe powershell.exe -c \""+
 "    if(m.Msg==26 && m.WParam==IntPtr.Zero && Marshal.PtrToStringAuto(m.LParam)==\\\"ImmersiveColorSet\\\") Task.Run(()=>{UpdtDM(); DarkModeChanged();});"+
 "  }"+
 "  public DLForm(){"+
-"    SetThreadDpiAwarenessContext(-4);"+
 "    UpdtDM();"+
 "  }"+
-"}' -R System.Windows.Forms;"+
+"}' -R $ref;"+
 "function Show-DLForm{"+
 "  param([Parameter(Mandatory=$true)][DLForm]$sdlf_DLForm,"+
 "        [ScriptBlock]$sdlf_DarkModeChangedAction={})"+
@@ -54,11 +60,13 @@ new ActiveXObject('WScript.Shell').Run("conhost.exe powershell.exe -c \""+
 "  $sdlf_Rs.Dispose();"+
 "  $sdlf_Ps.Dispose();"+
 "}"+
-"$wnd=[DLForm]@{AutoSize=$true; FormBorderStyle='Fixed3D'; Icon=[Drawing.Icon]::ExtractAssociatedIcon($PSHOME+'\\powershell.exe'); MaximizeBox=$false; Text='Calendar'};"+
+"[DLForm]::SetThreadDpiAware();"+
+"$wnd=[DLForm]@{AutoSize=$true; FormBorderStyle='Fixed3D'; Icon=[Drawing.Icon]::ExtractAssociatedIcon((gps -Id $PID).Path); MaximizeBox=$false; Text='Calendar'};"+
 "$wnd.add_Shown({$cal.Left=($wnd.ClientSize.Width-$cal.Width)/2; $cal.Top=$chk.Height; $wnd.Activate()});"+
-"$chk=[Windows.Forms.CheckBox]@{AutoSize=$true; Padding='20,10,0,20'; Text='Always on top'};"+
+"$chk=[Windows.Forms.CheckBox]@{AutoSize=$true; Font='Microsoft Sans Serif,8'; Padding='20,10,0,20'; Text='Always on top'};"+
 "$chk.add_CheckedChanged({$wnd.TopMost=$chk.Checked});"+
 "$cal=[Windows.Forms.MonthCalendar]@{CalendarDimensions='3,4'; Margin='0,0,0,20'; ScrollChange=3; ShowToday=$false; ShowWeekNumbers=$true};"+
+"$cal.Font=\\\"Microsoft Sans Serif,$($cal.Font.Size)\\\";"+
 "$wnd.Controls.AddRange(@($chk,$cal));"+
 "$settheme={"+
 "  if($wnd.DarkMode){$thm='#3F4144','#1F2023','White','#CFD1D4','Black'}else{$thm='#DFE0E3','#EFF0F2','Black','#3F4144','White'}"+
