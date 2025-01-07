@@ -1,11 +1,14 @@
 @set ps=&for %%i in (pwsh.exe powershell.exe) do @if not defined ps set ps=%%~$PATH:i
 @start /min conhost.exe "%ps%" -w Hidden -c ^"^
+$zoom = 1.0;^
 Add-Type -AN System.Windows.Forms;^
 if ($host.Version.Major -lt 7) {^
   $ref = 'System.Windows.Forms';^
+  $fct = 0.7;^
 }^
 else {^
-  $ref = 'Microsoft.Win32.Registry', 'System.Windows.Forms', 'System.ComponentModel.Primitives', 'System.Windows.Forms.Primitives', 'System.Threading.Thread';^
+  $ref = 'Microsoft.Win32.Registry', 'System.ComponentModel.Primitives', 'System.Threading.Thread', 'System.Windows.Forms', 'System.Windows.Forms.Primitives';^
+  $fct = 0.62;^
 }^
 Add-Type '^
 using Microsoft.Win32;^
@@ -17,7 +20,7 @@ public class DLForm : Form {^
   [DllImport(\"dwmapi.dll\")] private static extern int DwmSetWindowAttribute(IntPtr w, int a, ref int v, int s);^
   [DllImport(\"user32.dll\")] private static extern int SetThreadDpiAwarenessContext(int c);^
   private const string customThemeKey = @\"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize\";^
-  private const int DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 = -4;^
+  private const int DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE = -3;^
   private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;^
   private const int FALSE = 0;^
   private const int S_OK = 0;^
@@ -27,7 +30,7 @@ public class DLForm : Form {^
   private static readonly IntPtr wpFALSE = IntPtr.Zero;^
   private static readonly IntPtr wpTRUE = new IntPtr(1);^
   public static void SetThreadDpiAware() {^
-    SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);^
+    SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);^
   }^
   public void SuspendRedrawWhile(Action act) {^
     Message msg = Message.Create(Handle, WM_SETREDRAW, wpFALSE, IntPtr.Zero);^
@@ -114,7 +117,7 @@ $wnd.add_Shown({^
 });^
 $chk = [Windows.Forms.CheckBox]@{^
   AutoSize = $true;^
-  Font = 'Microsoft Sans Serif, 8';^
+  Font = \"Microsoft Sans Serif, $(6 * $zoom)\";^
   Padding = '20, 10, 0, 20';^
   Text = 'Always on top';^
 };^
@@ -128,7 +131,7 @@ $cal = [Windows.Forms.MonthCalendar]@{^
   ShowToday = $false;^
   ShowWeekNumbers = $true;^
 };^
-$cal.Font = \"Microsoft Sans Serif, $($cal.Font.Size)\";^
+$cal.Font = \"Microsoft Sans Serif, $($cal.Font.Size * $fct * $zoom)\";^
 $wnd.Controls.AddRange(@($chk, $cal));^
 $settheme = {^
   if ($wnd.DarkMode) {^
