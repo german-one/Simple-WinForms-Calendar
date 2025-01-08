@@ -126,7 +126,7 @@ $chk.add_CheckedChanged({^
 });^
 $cal = [Windows.Forms.MonthCalendar]@{^
   CalendarDimensions = '3, 4';^
-  Margin = '0, 0, 0, 20';^
+  Margin = '0, 0, 0, 0';^
   ScrollChange = 3;^
   ShowToday = $false;^
   ShowWeekNumbers = $true;^
@@ -135,18 +135,18 @@ $cal.Font = \"Microsoft Sans Serif, $($cal.Font.Size * $fct * $zoom)\";^
 $wnd.Controls.AddRange(@($chk, $cal));^
 $settheme = {^
   if ($wnd.DarkMode) {^
-    $pal = '#3F4144', '#1F2023', 'White', '#CFD1D4', 'Black';^
+    $pal = 'White', 'Black', '#1F2023', '#CFD1D4', '#3F4144';^
   }^
   else {^
-    $pal = '#DFE0E3', '#EFF0F2', 'Black', '#3F4144', 'White';^
+    $pal = 'Black', 'White', '#EFF0F2', '#3F4144', '#DFE0E3';^
   }^
   $wnd.SuspendRedrawWhile({^
-    $cal.ForeColor = $pal[2];^
-    $cal.TitleForeColor = $pal[4];^
-    $chk.ForeColor = $pal[2];^
-    $cal.BackColor = $pal[1];^
+    $chk.ForeColor = $pal[0];^
+    $cal.ForeColor = $pal[0];^
+    $cal.TitleForeColor = $pal[1];^
+    $cal.BackColor = $pal[2];^
     $cal.TitleBackColor = $pal[3];^
-    $wnd.BackColor = $pal[0];^
+    $wnd.BackColor = $pal[4];^
     $wnd.DarkTitleBar = $wnd.DarkMode;^
   });^
 };^
