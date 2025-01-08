@@ -20,7 +20,7 @@ public class DLForm : Form {^
   [DllImport(\"dwmapi.dll\")] private static extern int DwmSetWindowAttribute(IntPtr w, int a, ref int v, int s);^
   [DllImport(\"user32.dll\")] private static extern int SetThreadDpiAwarenessContext(int c);^
   private const string customThemeKey = @\"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize\";^
-  private const int DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE = -3;^
+  private const int DPI_AWARENESS_CONTEXT_SYSTEM_AWARE = -2;^
   private const int DWMWA_USE_IMMERSIVE_DARK_MODE = 20;^
   private const int FALSE = 0;^
   private const int S_OK = 0;^
@@ -30,7 +30,7 @@ public class DLForm : Form {^
   private static readonly IntPtr wpFALSE = IntPtr.Zero;^
   private static readonly IntPtr wpTRUE = new IntPtr(1);^
   public static void SetThreadDpiAware() {^
-    SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);^
+    SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_SYSTEM_AWARE);^
   }^
   public void SuspendRedrawWhile(Action act) {^
     Message msg = Message.Create(Handle, WM_SETREDRAW, wpFALSE, IntPtr.Zero);^
