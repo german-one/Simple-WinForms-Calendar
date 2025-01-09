@@ -107,6 +107,7 @@ ws.Run("conhost.exe " + ps + " -c \"" +
 "[DLForm]::SetThreadDpiAware();" +
 "$wnd = [DLForm]@{" +
 "  AutoSize = $true;" +
+"  AutoSizeMode = 'GrowAndShrink';" +
 "  FormBorderStyle = 'Fixed3D';" +
 "  Icon = [Drawing.Icon]::ExtractAssociatedIcon((Get-Process -Id $PID).Path);" +
 "  MaximizeBox = $false;" +
@@ -127,7 +128,7 @@ ws.Run("conhost.exe " + ps + " -c \"" +
 "});" +
 "$cal = [Windows.Forms.MonthCalendar]@{" +
 "  CalendarDimensions = '3, 4';" +
-"  Margin = '0, 0, 0, 0';" +
+"  Margin = '0, 0, 0, 20';" +
 "  ScrollChange = 3;" +
 "  ShowToday = $false;" +
 "  ShowWeekNumbers = $true;" +
