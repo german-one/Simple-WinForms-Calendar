@@ -114,12 +114,17 @@ ws.Run("conhost.exe " + ps + " -c \"" +
 "  Text = 'Calendar';" +
 "};" +
 "$wnd.add_Shown({" +
-"  $cal.Top = $chk.Height;" +
+"  $rba.Left = 10;" +
+"  $rbl.Left = $rba.Right + 10;" +
+"  $rbd.Left = $rbl.Right + 10;" +
+"  $rbd.Top = $rbl.Top = $rba.Top = 20;" +
+"  $grp.Location = \\\"$($cal.Right - $grp.Width - 20), 10\\\";" +
+"  $cal.Top = $grp.Bottom + 10;" +
 "  $wnd.Activate();" +
 "});" +
 "$chk = [Windows.Forms.CheckBox]@{" +
 "  AutoSize = $true;" +
-"  Font = \\\"Microsoft Sans Serif, $(6 * $zoom)\\\";" +
+"  Font = \\\"Segoe UI, $(6 * $zoom)\\\";" +
 "  Padding = '20, 10, 0, 20';" +
 "  Text = 'Always on top';" +
 "};" +
@@ -133,23 +138,58 @@ ws.Run("conhost.exe " + ps + " -c \"" +
 "  ShowToday = $false;" +
 "  ShowWeekNumbers = $true;" +
 "};" +
-"$cal.Font = \\\"Microsoft Sans Serif, $($cal.Font.Size * $fct * $zoom)\\\";" +
-"$wnd.Controls.AddRange(@($chk, $cal));" +
+"$cal.Font = \\\"$($chk.Font.FontFamily), $($cal.Font.Size * $fct * $zoom)\\\";" +
+"$grp = [Windows.Forms.GroupBox]@{" +
+"  AutoSize = $true;" +
+"  AutoSizeMode = 'GrowAndShrink';" +
+"  Font =$cal.Font;" +
+"  Text = 'Theme';" +
+"};" +
+"$rba = [Windows.Forms.RadioButton]@{" +
+"  AutoSize = $true;" +
+"  Checked = $true;" +
+"  Font = $chk.Font;" +
+"  Margin = '0, 0, 0, 0';" +
+"  Text = 'Auto';" +
+"};" +
+"$rba.add_CheckedChanged({" +
+"  if ($rba.Checked) {&$settheme};" +
+"});" +
+"$rbl = [Windows.Forms.RadioButton]@{" +
+"  AutoSize = $true;" +
+"  Font = $chk.Font;" +
+"  Margin = '0, 0, 0, 0';" +
+"  Text = 'Light';" +
+"};" +
+"$rbl.add_CheckedChanged({" +
+"  if ($rbl.Checked) {&$settheme};" +
+"});" +
+"$rbd = [Windows.Forms.RadioButton]@{" +
+"  AutoSize = $true;" +
+"  Font = $chk.Font;" +
+"  Margin = '0, 0, 0, 0';" +
+"  Text = 'Dark';" +
+"};" +
+"$rbd.add_CheckedChanged({" +
+"  if ($rbd.Checked) {&$settheme};" +
+"});" +
+"$grp.Controls.AddRange(@($rba, $rbl, $rbd));" +
+"$wnd.Controls.AddRange(@($chk, $grp, $cal));" +
 "$settheme = {" +
-"  if ($wnd.DarkMode) {" +
+"  $dark = $(if ($rba.Checked) {$wnd.DarkMode} else {$rbd.Checked});" +
+"  if ($dark) {" +
 "    $pal = 'White', 'Black', '#1F2023', '#CFD1D4', '#3F4144';" +
 "  }" +
 "  else {" +
 "    $pal = 'Black', 'White', '#EFF0F2', '#3F4144', '#DFE0E3';" +
 "  }" +
 "  $wnd.SuspendRedrawWhile({" +
-"    $chk.ForeColor = $pal[0];" +
-"    $cal.ForeColor = $pal[0];" +
+"    $cal.ForeColor = $grp.ForeColor = $chk.ForeColor = $pal[0];" +
 "    $cal.TitleForeColor = $pal[1];" +
 "    $cal.BackColor = $pal[2];" +
 "    $cal.TitleBackColor = $pal[3];" +
 "    $wnd.BackColor = $pal[4];" +
-"    $wnd.DarkTitleBar = $wnd.DarkMode;" +
+"    $wnd.DarkTitleBar = $dark;" +
 "  });" +
 "};" +
 "&$settheme;" +
