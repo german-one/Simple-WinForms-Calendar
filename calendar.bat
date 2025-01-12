@@ -139,6 +139,7 @@ $btn.add_Click({^
 });^
 $chk = [Windows.Forms.CheckBox]@{^
   AutoSize = $true;^
+  FlatStyle = 'Flat';^
   Font = $btn.Font;^
   Location = '200, 25';^
   Text = 'Always on top';^
@@ -146,49 +147,40 @@ $chk = [Windows.Forms.CheckBox]@{^
 $chk.add_CheckedChanged({^
   $wnd.TopMost = $chk.Checked;^
 });^
+$grp = [Windows.Forms.GroupBox]@{^
+  AutoSize = $true;^
+  AutoSizeMode = 'GrowAndShrink';^
+  Text = 'Theme';^
+};^
+$grp.Font = \"$($btn.Font.FontFamily), $($grp.Font.Size * $fct * $zoom)\";^
+$rbprop = @{^
+  AutoSize = $true;^
+  FlatStyle = 'Flat';^
+  Font = $btn.Font;^
+  Margin = '0, 0, 0, 0';^
+};^
+$rbact = {^
+  if ($this.Checked) {^&$settheme}^
+};^
+$rba = [Windows.Forms.RadioButton]$rbprop;^
+$rba.Checked = $true;^
+$rba.Text = 'Auto';^
+$rba.add_CheckedChanged($rbact);^
+$rbl = [Windows.Forms.RadioButton]$rbprop;^
+$rbl.Text = 'Light';^
+$rbl.add_CheckedChanged($rbact);^
+$rbd = [Windows.Forms.RadioButton]$rbprop;^
+$rbd.Text = 'Dark';^
+$rbd.add_CheckedChanged($rbact);^
+$grp.Controls.AddRange(@($rba, $rbl, $rbd));^
 $cal = [Windows.Forms.MonthCalendar]@{^
   CalendarDimensions = '3, 4';^
+  Font =$grp.Font;^
   Margin = '0, 0, 0, 15';^
   ScrollChange = 3;^
   ShowToday = $false;^
   ShowWeekNumbers = $true;^
 };^
-$cal.Font = \"$($btn.Font.FontFamily), $($cal.Font.Size * $fct * $zoom)\";^
-$grp = [Windows.Forms.GroupBox]@{^
-  AutoSize = $true;^
-  AutoSizeMode = 'GrowAndShrink';^
-  Font =$cal.Font;^
-  Text = 'Theme';^
-};^
-$rba = [Windows.Forms.RadioButton]@{^
-  AutoSize = $true;^
-  Checked = $true;^
-  Font = $btn.Font;^
-  Margin = '0, 0, 0, 0';^
-  Text = 'Auto';^
-};^
-$rba.add_CheckedChanged({^
-  if ($rba.Checked) {^&$settheme}^
-});^
-$rbl = [Windows.Forms.RadioButton]@{^
-  AutoSize = $true;^
-  Font = $btn.Font;^
-  Margin = '0, 0, 0, 0';^
-  Text = 'Light';^
-};^
-$rbl.add_CheckedChanged({^
-  if ($rbl.Checked) {^&$settheme}^
-});^
-$rbd = [Windows.Forms.RadioButton]@{^
-  AutoSize = $true;^
-  Font = $btn.Font;^
-  Margin = '0, 0, 0, 0';^
-  Text = 'Dark';^
-};^
-$rbd.add_CheckedChanged({^
-  if ($rbd.Checked) {^&$settheme}^
-});^
-$grp.Controls.AddRange(@($rba, $rbl, $rbd));^
 $wnd.Controls.AddRange(@($btn, $chk, $grp, $cal));^
 $settheme = {^
   $dark = $(if ($rba.Checked) {$wnd.DarkMode} else {$rbd.Checked});^
