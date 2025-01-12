@@ -2,7 +2,6 @@ var i = 0, fs = new ActiveXObject('Scripting.FileSystemObject'), ws = new Active
 for (; i < ap.length; ++i) {if (ap[i] != '' && fs.FileExists(ap[i] + '\\pwsh.exe')) {ps = 'pwsh.exe'; break;}}
 ws.Run("conhost.exe " + ps + " -c \"" +
 "$zoom = 1.0;" +
-"Add-Type -AN System.Windows.Forms;" +
 "if ($host.Version.Major -lt 7) {" +
 "  $ref = 'System.Windows.Forms';" +
 "  $fct = 0.7;" +
@@ -11,6 +10,7 @@ ws.Run("conhost.exe " + ps + " -c \"" +
 "  $ref = 'Microsoft.Win32.Registry', 'System.ComponentModel.Primitives', 'System.Threading.Thread', 'System.Windows.Forms', 'System.Windows.Forms.Primitives';" +
 "  $fct = 0.62;" +
 "}" +
+"Add-Type -AN System.Windows.Forms;" +
 "Add-Type '" +
 "using Microsoft.Win32;" +
 "using System;" +
@@ -114,13 +114,13 @@ ws.Run("conhost.exe " + ps + " -c \"" +
 "  Text = 'Calendar';" +
 "};" +
 "$wnd.add_Shown({" +
-"  $rba.Left = 10;" +
-"  $rbl.Left = $rba.Right + 10;" +
-"  $rbd.Left = $rbl.Right + 10;" +
-"  $rbd.Top = $rbl.Top = $rba.Top = 20;" +
+"  $rbs[0].Left = 10;" +
+"  $rbs[1].Left = $rbs[0].Right + 10;" +
+"  $rbs[2].Left = $rbs[1].Right + 10;" +
 "  $grp.Location = \\\"$($wnd.ClientSize.Width - $grp.Width - 25), 5\\\";" +
 "  $cal.Top = $grp.Bottom + 15;" +
 "  $wnd.Activate();" +
+"  &$settheme;" +
 "});" +
 "$btn = [Windows.Forms.Button]@{" +
 "  AutoSize = $true;" +
@@ -134,9 +134,7 @@ ws.Run("conhost.exe " + ps + " -c \"" +
 "  $now = Get-Date;" +
 "  $first = Get-Date -Year $now.Year -Month 1 -Day 1;" +
 "  $last = Get-Date -Year $now.Year -Month 12 -Day 31;" +
-"  $cal.SelectionRange = @{Start = $first; End = $first;};" +
-"  $cal.SelectionRange = @{Start = $last; End = $last;};" +
-"  $cal.SelectionRange = @{Start = $now; End = $now;};" +
+"  $first, $last, $now | ForEach-Object{$cal.SelectionRange = @{Start = $_; End = $_;}};" +
 "});" +
 "$chk = [Windows.Forms.CheckBox]@{" +
 "  AutoSize = $true;" +
@@ -159,21 +157,17 @@ ws.Run("conhost.exe " + ps + " -c \"" +
 "  FlatStyle = 'Flat';" +
 "  Font = $btn.Font;" +
 "  Margin = '0, 0, 0, 0';" +
+"  Top = 20;" +
 "};" +
-"$rbact = {" +
+"[Windows.Forms.RadioButton[]]$rbs = $rbprop, $rbprop, $rbprop;" +
+"$rbs[0].Checked = $true;" +
+"$rbs[0].Text = 'Auto';" +
+"$rbs[1].Text = 'Light';" +
+"$rbs[2].Text = 'Dark';" +
+"$rbs | ForEach-Object {$_.add_CheckedChanged({" +
 "  if ($this.Checked) {&$settheme}" +
-"};" +
-"$rba = [Windows.Forms.RadioButton]$rbprop;" +
-"$rba.Checked = $true;" +
-"$rba.Text = 'Auto';" +
-"$rba.add_CheckedChanged($rbact);" +
-"$rbl = [Windows.Forms.RadioButton]$rbprop;" +
-"$rbl.Text = 'Light';" +
-"$rbl.add_CheckedChanged($rbact);" +
-"$rbd = [Windows.Forms.RadioButton]$rbprop;" +
-"$rbd.Text = 'Dark';" +
-"$rbd.add_CheckedChanged($rbact);" +
-"$grp.Controls.AddRange(@($rba, $rbl, $rbd));" +
+"})};" +
+"$grp.Controls.AddRange($rbs);" +
 "$cal = [Windows.Forms.MonthCalendar]@{" +
 "  CalendarDimensions = '3, 4';" +
 "  Font =$grp.Font;" +
@@ -184,7 +178,7 @@ ws.Run("conhost.exe " + ps + " -c \"" +
 "};" +
 "$wnd.Controls.AddRange(@($btn, $chk, $grp, $cal));" +
 "$settheme = {" +
-"  $dark = $(if ($rba.Checked) {$wnd.DarkMode} else {$rbd.Checked});" +
+"  $dark = $(if ($rbs[0].Checked) {$wnd.DarkMode} else {$rbs[2].Checked});" +
 "  if ($dark) {" +
 "    $pal = 'White', 'Black', '#1F2023', '#CFD1D4', '#3F4144'" +
 "  }" +
@@ -200,5 +194,4 @@ ws.Run("conhost.exe " + ps + " -c \"" +
 "    $wnd.DarkTitleBar = $dark;" +
 "  });" +
 "};" +
-"&$settheme;" +
 "Show-DLForm $wnd $settheme;\"", 0, false);
